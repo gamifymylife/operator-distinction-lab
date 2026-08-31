@@ -112,6 +112,12 @@ The v0.2 design is specified in [docs/EXPERIMENT_V0_2.md](docs/EXPERIMENT_V0_2.m
 evaluator has a real screening cost: early paired mechanism steps are reported separately so any
 ranking gain is not presented as free.
 
+The untouched frozen outcome is reported in
+[docs/BENCHMARK_V0_2.md](docs/BENCHMARK_V0_2.md). The proposed paired advantage was **not
+supported**: interpolation was nearly saturated by the intrinsic baseline, and leave-one-family-out
+transfer failed sharply on spectral cutoff. This negative result is the reason to keep the FNO out
+of the tuning loop.
+
 ## Roadmap
 
 1. **Instrument validation:** controlled Burgers reference/surrogate experiment.
