@@ -1,0 +1,138 @@
+{
+  "payload": {
+    "artifacts": {
+      "required": [
+        "manifest.json",
+        "summary.json",
+        "split_audit.json",
+        "provenance.json",
+        "predictions.jsonl",
+        "evaluations.jsonl",
+        "case_metrics.csv",
+        "report.html"
+      ],
+      "schema_version": "operator_distinction.artifacts.v0.2"
+    },
+    "claim_level": "synthetic_predictive_validation_only",
+    "evaluation": {
+      "bootstrap_repeats": 2000,
+      "budgets": [
+        20,
+        40,
+        80,
+        120,
+        220
+      ],
+      "primary_estimand": "paired_minus_intrinsic_oracle_fraction",
+      "primary_budget": 220,
+      "multiple_testing_correction": "holm_familywise_across_five_budgets",
+      "random_seeds": [
+        11,
+        23,
+        47
+      ],
+      "statistics_seed": 20260903,
+      "stopping_rule": "run_every_frozen_budget_for_every_case",
+      "threshold_quantile": 0.95
+    },
+    "evaluators": {
+      "baseline": "naive_intrinsic_ridge",
+      "candidate": "paired_discrepancy_ridge",
+      "early_horizon_steps": 8,
+      "feature_contract": {
+        "candidate_implementation_access": false,
+        "intrinsic": [
+          "rms",
+          "normalized_maximum",
+          "normalized_minimum",
+          "gradient_rms",
+          "total_variation",
+          "skewness",
+          "kurtosis",
+          "zero_crossing_rate"
+        ],
+        "paired_early_response": [
+          "final_l2",
+          "max_l2",
+          "mean_l2",
+          "l2_slope",
+          "final_linf",
+          "max_linf",
+          "final_gradient_l2",
+          "max_gradient_l2",
+          "final_energy_error",
+          "max_energy_error"
+        ],
+        "prediction_target": "late_horizon_discrepancy_excluding_early_response_window"
+      },
+      "ridge": 0.001
+    },
+    "experiment": "sealed_burgers_operator_family_validation_v0_2",
+    "interventions": {
+      "admissibility": "periodic_zero_mean_fixed_rms_fourier_series",
+      "descriptor_version": "generic_intrinsic_v0_2",
+      "modes": 10,
+      "target_rms": 0.65
+    },
+    "operator": {
+      "dt": 0.0025,
+      "families": [
+        {
+          "name": "spectral_cutoff",
+          "parameter": "modes_kept",
+          "values": [
+            4,
+            6
+          ]
+        },
+        {
+          "name": "viscosity_scale",
+          "parameter": "viscosity_multiplier",
+          "values": [
+            0.6,
+            1.5
+          ]
+        },
+        {
+          "name": "advection_scale",
+          "parameter": "advection_multiplier",
+          "values": [
+            0.75,
+            1.25
+          ]
+        },
+        {
+          "name": "forcing_bias",
+          "parameter": "forcing_amplitude",
+          "values": [
+            -0.08,
+            0.08
+          ]
+        }
+      ],
+      "grid_size": 64,
+      "reference": "periodic_pseudospectral_viscous_burgers_rk4",
+      "steps": 64,
+      "viscosity": 0.02
+    },
+    "protocol_version": "operator_distinction.v0.2",
+    "splits": {
+      "calibration_pool": {
+        "seed": 20260901,
+        "size": 96
+      },
+      "evaluation_pool": {
+        "seed": 20260902,
+        "size": 256
+      },
+      "protocols": [
+        "interpolation",
+        "leave_one_family_out"
+      ]
+    }
+  },
+  "seal": {
+    "algorithm": "sha256",
+    "digest": "ac5904a9b60a6b117b3c6151be7e1462a237fb1097bb175a3f3064ce5fcba1dc"
+  }
+}

@@ -41,8 +41,32 @@ distinction instrument using:
 - neighborhood tests showing whether a witness is isolated or marks a local failure region.
 
 The surrogate is a controlled stand-in, **not** a neural operator and not evidence about real-world
-weather or fluid models. The next milestone replaces it with a trained FNO adapter without changing
-the search or evaluation contract.
+weather or fluid models.
+
+## v0.2: sealed operator-family validation
+
+v0.2 asks a narrower and harder validation question before an FNO is introduced:
+
+> Does a paired discrepancy-aware evaluator recover high-discrepancy interventions better than a
+> naive intrinsic baseline under deterministic interpolation and held-out operator-family splits?
+
+The protocol is committed as a SHA-256-sealed manifest. It freezes the intervention grammar,
+operator families, feature contracts, ridge parameters, pool seeds, budgets, random baselines,
+threshold, stopping rule, statistics, and artifact schema. Any edit invalidates the seal.
+
+The comparison is deliberately symmetric:
+
+- `naive_intrinsic` receives eight candidate-independent summaries of the initial field;
+- `paired_discrepancy` receives those summaries plus ten generic summaries of an early paired
+  candidate/reference response;
+- both predict discrepancy over a strictly later, non-overlapping time window using the same frozen
+  ridge estimator;
+- evaluation labels remain sealed until both prediction vectors have been hashed;
+- leave-one-family-out evaluation withholds every example from one misspecification mechanism.
+
+The four controlled families are spectral cutoff, viscosity scaling, advection scaling, and an
+unmodeled forcing term. This is a test of synthetic predictive recovery. It is not causal
+identification, neural-operator validation, or evidence of physical truth.
 
 ## Quick start
 
@@ -52,6 +76,8 @@ source .venv/bin/activate
 python -m pip install -e ".[dev]"
 pytest
 operator-distinction run --output results/v0_1
+operator-distinction verify-manifest configs/burgers_v0_2.sealed.json
+operator-distinction run-v0-2 --output results/v0_2
 ```
 
 The run writes:
@@ -60,6 +86,9 @@ The run writes:
 - `evaluations.jsonl`: every tested intervention and scalar selection score;
 - `best_witness.npz`: initial field, reference trajectory, candidate trajectory, and full residual;
 - `generalization.json`: perturbation-neighborhood retention around the best adaptive witness.
+
+The v0.2 run writes the sealed manifest, summary, split audit, provenance with source hashes,
+prediction commits, per-case JSONL/CSV metrics, and a standalone HTML report.
 
 ## Experimental contract
 
@@ -79,16 +108,28 @@ The first frozen run is reported in [docs/BENCHMARK_V0_1.md](docs/BENCHMARK_V0_1
 found the strongest observed witness within 40 comparisons; fixed enumeration required 220. This is
 encouraging instrument evidence, not a generalization claim.
 
+The v0.2 design is specified in [docs/EXPERIMENT_V0_2.md](docs/EXPERIMENT_V0_2.md). Its paired
+evaluator has a real screening cost: early paired mechanism steps are reported separately so any
+ranking gain is not presented as free.
+
+The untouched frozen outcome is reported in
+[docs/BENCHMARK_V0_2.md](docs/BENCHMARK_V0_2.md). The proposed paired advantage was **not
+supported**: interpolation was nearly saturated by the intrinsic baseline, and leave-one-family-out
+transfer failed sharply on spectral cutoff. This negative result is the reason to keep the FNO out
+of the tuning loop.
+
 ## Roadmap
 
 1. **Instrument validation:** controlled Burgers reference/surrogate experiment.
-2. **Neural operator:** train and freeze a small FNO on the same admissible domain.
-3. **Independent boundary test:** evaluate out-of-distribution and rare-regime witnesses.
-4. **Formal replay:** translate one discovered invariant violation into a Lean/TorchLean obligation.
-5. **External replication:** test a third-party pretrained physical surrogate without modifying the
+2. **Sealed validation:** interpolation and held-out operator-family evaluation without FNO tuning.
+3. **Neural operator:** train and freeze a small FNO separately, then connect it through the frozen
+   operator contract.
+4. **Independent boundary test:** evaluate out-of-distribution and rare-regime witnesses.
+5. **Formal replay:** translate one discovered invariant violation into a Lean/TorchLean obligation.
+6. **External replication:** test a third-party pretrained physical surrogate without modifying the
    frozen search policy.
 
 ## Status
 
 Research prototype. No claim of generalization to neural operators, weather, climate, plasma,
-control systems, or physical reality is made by v0.1.
+control systems, or physical reality is made by v0.1 or v0.2.
